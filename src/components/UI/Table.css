@@ -1,0 +1,99 @@
+.table-container {
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-secondary);
+  transition: background-color 0.3s ease;
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
+}
+
+.table th {
+  background-color: var(--bg-hover);
+  font-weight: 600;
+  color: var(--text-primary);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.table tr:hover {
+  background-color: var(--bg-hover);
+  transition: background-color 0.3s ease;
+}
+
+.actions-cell {
+  width: 120px;
+  text-align: center;
+}
+
+.actions-buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  color: var(--text-secondary);
+  font-size: 18px;
+}
+
+.action-btn:focus {
+  outline: 2px solid var(--primary-color);
+}
+
+.action-btn svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.action-btn.action-view:hover {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.action-btn.action-edit:hover {
+  background: var(--warning-color);
+  color: #fff;
+}
+
+.action-btn.action-delete:hover {
+  background: var(--danger-color);
+  color: #fff;
+}
+
+.table-empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.table-empty p {
+  margin: 0;
+  font-size: 16px;
+} 
