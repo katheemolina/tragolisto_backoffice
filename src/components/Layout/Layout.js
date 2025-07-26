@@ -1,10 +1,21 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import ThemeToggle from '../UI/ThemeToggle';
 import logoImg from '../../assets/portada.png';
+import { toast } from 'react-toastify';
 import './Layout.css';
 
 const Layout = ({ children }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('user');
+    localStorage.removeItem('loginTime');
+    toast.success('Sesión cerrada exitosamente');
+    navigate('/login');
+  };
+
   return (
     <div className="layout">
       <nav className="sidebar">
@@ -43,6 +54,14 @@ const Layout = ({ children }) => {
         </ul>
         <div className="sidebar-bottom">
           <ThemeToggle />
+          <button 
+            onClick={handleLogout}
+            className="logout-btn"
+            title="Cerrar sesión"
+          >
+            <span className="logout-icon">🚪</span>
+            Cerrar Sesión
+          </button>
         </div>
       </nav>
       <main className="main-content">
