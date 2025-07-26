@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { dashboardService } from '../../services/api';
+import { toast } from 'react-toastify';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -7,8 +8,9 @@ const Dashboard = () => {
     totalTragos: 0,
     totalIngredientes: 0,
     totalJuegos: 0,
-    tragosPopulares: []
+    totalUsuarios: 0
   });
+  const [tragosPopulares, setTragosPopulares] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,23 +20,31 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      // Por ahora usamos datos mock, luego conectaremos con el backend
-      const mockStats = {
-        totalTragos: 25,
-        totalIngredientes: 45,
-        totalJuegos: 8,
-        tragosPopulares: [
-          { id: 1, nombre: 'Mojito', visitas: 150 },
-          { id: 2, nombre: 'Margarita', visitas: 120 },
-          { id: 3, nombre: 'Piña Colada', visitas: 95 },
-          { id: 4, nombre: 'Daiquiri', visitas: 80 },
-          { id: 5, nombre: 'Cosmopolitan', visitas: 65 }
-        ]
-      };
       
-      setStats(mockStats);
+      // Cargar indicadores
+      console.log('Cargando indicadores...');
+      const indicadoresRes = await dashboardService.getIndicadores();
+      console.log('Indicadores:', indicadoresRes.data);
+      
+      if (indicadoresRes.data.success) {
+        setStats({
+          totalTragos: indicadoresRes.data.data.total_tragos,
+          totalIngredientes: indicadoresRes.data.data.total_ingredientes,
+          totalJuegos: indicadoresRes.data.data.total_juegos,
+          totalUsuarios: indicadoresRes.data.data.total_usuarios
+        });
+      }
+      
+      // Cargar top tragos
+      console.log('Cargando top tragos...');
+      const topTragosRes = await dashboardService.getTopTragos();
+      console.log('Top tragos:', topTragosRes.data);
+      
+      setTragosPopulares(topTragosRes.data);
+      
     } catch (error) {
       console.error('Error cargando datos del dashboard:', error);
+      toast.error('Error al cargar los datos del dashboard');
     } finally {
       setLoading(false);
     }
@@ -83,38 +93,53 @@ const Dashboard = () => {
             <p className="stat-label">Total Juegos</p>
           </div>
         </div>
+
+        <div className="stat-card">
+          <div className="stat-icon">👥</div>
+          <div className="stat-content">
+            <h3 className="stat-number">{stats.totalUsuarios}</h3>
+            <p className="stat-label">Total Usuarios</p>
+          </div>
+        </div>
       </div>
 
       <div className="dashboard-content">
         <div className="popular-drinks">
-          <h2>Tragos Más Populares</h2>
+          <h2>Top 5 Tragos Más Favoritos</h2>
           <div className="popular-list">
-            {stats.tragosPopulares.map((trago, index) => (
-              <div key={trago.id} className="popular-item">
-                <div className="popular-rank">#{index + 1}</div>
-                <div className="popular-info">
-                  <h4>{trago.nombre}</h4>
-                  <p>{trago.visitas} visitas</p>
+            {tragosPopulares.length > 0 ? (
+              tragosPopulares.map((trago, index) => (
+                <div key={trago.trago_id} className="popular-item">
+                  <div className="popular-rank">#{index + 1}</div>
+                  <div className="popular-info">
+                    <h4>{trago.nombre}</h4>
+                    <p className="popular-desc">{trago.descripcion}</p>
+                    <p className="popular-favorites">{trago.total_favoritos} favoritos</p>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="no-data">
+                <p>No hay datos de tragos favoritos disponibles</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
         <div className="quick-actions">
           <h2>Acciones Rápidas</h2>
           <div className="actions-grid">
-            <button className="action-btn">
-              <span className="action-icon">➕</span>
-              <span>Agregar Trago</span>
+            <button className="action-btn" onClick={() => window.location.href = '/tragos'}>
+              <span className="action-icon">🍹</span>
+              <span>Gestionar Tragos</span>
             </button>
-            <button className="action-btn">
+            <button className="action-btn" onClick={() => window.location.href = '/ingredientes'}>
               <span className="action-icon">🥤</span>
-              <span>Agregar Ingrediente</span>
+              <span>Gestionar Ingredientes</span>
             </button>
-            <button className="action-btn">
+            <button className="action-btn" onClick={() => window.location.href = '/juegos'}>
               <span className="action-icon">🎮</span>
-              <span>Agregar Juego</span>
+              <span>Gestionar Juegos</span>
             </button>
           </div>
         </div>

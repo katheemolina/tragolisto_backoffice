@@ -54,7 +54,8 @@ export const usuariosService = {
 
 // Dashboard helpers (usando los endpoints disponibles)
 export const dashboardService = {
-  getTopTragos: () => api.get('/tragos/top-favoritos'),
+  getTopTragos: () => api.get('/toptragos'),
+  getIndicadores: () => api.get('/indicadores'),
   getTragos: () => api.get('/tragos/'),
   getIngredientes: () => api.get('/ingredientes/'),
   getJuegos: () => api.get('/modofiesta/'),
