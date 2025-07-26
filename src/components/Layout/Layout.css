@@ -116,12 +116,16 @@
   padding: 24px 0 0 0;
 }
 
-.main-content {
+.layout .main-content {
   flex: 1;
   padding: 20px;
   background-color: var(--bg-primary);
   overflow-y: auto;
   transition: background-color 0.3s ease;
+  margin-left: 250px;
+  min-height: 100vh;
+  width: calc(100vw - 250px);
+  max-width: none;
 }
 
 .page-header {
@@ -140,16 +144,6 @@
   color: var(--text-secondary);
   font-size: 16px;
   transition: color 0.3s ease;
-}
-
-.layout .main-content {
-  flex: 1;
-  padding: 20px;
-  background-color: var(--bg-primary);
-  overflow-y: auto;
-  transition: background-color 0.3s ease;
-  margin-left: 250px;
-  min-height: 100vh;
 }
 
 @media (max-width: 900px) {

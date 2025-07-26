@@ -2,7 +2,17 @@ import React from 'react';
 import { MdVisibility, MdEdit, MdDelete } from 'react-icons/md';
 import './Table.css';
 
-const Table = ({ columns, data, onEdit, onDelete, onView }) => {
+const Table = ({ columns, data, onEdit, onDelete, onView, loading = false, emptyMessage = "No hay datos para mostrar" }) => {
+  if (loading) {
+    return (
+      <div className="table-container">
+        <div className="table-loading">
+          <p>Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="table-container">
       <table className="table">
@@ -63,7 +73,7 @@ const Table = ({ columns, data, onEdit, onDelete, onView }) => {
       </table>
       {data.length === 0 && (
         <div className="table-empty">
-          <p>No hay datos para mostrar</p>
+          <p>{emptyMessage}</p>
         </div>
       )}
     </div>
