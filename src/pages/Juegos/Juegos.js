@@ -3,6 +3,7 @@ import Table from '../../components/UI/Table';
 import Button, { PlusIcon } from '../../components/UI/Button';
 import Modal from '../../components/UI/Modal';
 import ConfirmDialog from '../../components/UI/ConfirmDialog';
+import SearchFilter from '../../components/UI/SearchFilter';
 import { juegosService } from '../../services/api';
 import { toast } from 'react-toastify';
 import './Juegos.css';
@@ -30,6 +31,7 @@ const Juegos = () => {
     max_jugadores: '',
     es_para_beber: false
   });
+  const [filteredJuegos, setFilteredJuegos] = useState([]);
 
   // Categorías predefinidas para el select
   const categorias = [
@@ -47,22 +49,45 @@ const Juegos = () => {
     'Fiesta'
   ];
 
+  // Configuración de filtros para juegos
+  const filterOptions = {
+    es_para_beber: {
+      label: 'Tipo de juego',
+      values: [
+        { value: 1, label: 'Para beber' },
+        { value: 0, label: 'Sin alcohol' }
+      ]
+    },
+    categoria: {
+      label: 'Categoría',
+      values: categorias.map(cat => ({ value: cat, label: cat }))
+    }
+  };
+
   useEffect(() => {
     loadJuegos();
   }, []);
 
+  // Efecto para inicializar los datos filtrados cuando se cargan los datos
+  useEffect(() => {
+    setFilteredJuegos(allJuegos);
+    setPagina(1); // Resetear a la primera página cuando cambian los datos
+  }, [allJuegos]);
+
   // Efecto separado para aplicar paginación cuando cambia la página
   useEffect(() => {
-    if (allJuegos.length > 0) {
+    if (filteredJuegos.length > 0) {
       const startIndex = (pagina - 1) * JUEGOS_POR_PAGINA;
       const endIndex = startIndex + JUEGOS_POR_PAGINA;
-      const paginatedJuegos = allJuegos.slice(startIndex, endIndex);
+      const paginatedJuegos = filteredJuegos.slice(startIndex, endIndex);
       
-      console.log(`Aplicando paginación: mostrando juegos ${startIndex + 1} a ${Math.min(endIndex, allJuegos.length)} de ${allJuegos.length}`);
+      console.log(`Aplicando paginación: mostrando juegos ${startIndex + 1} a ${Math.min(endIndex, filteredJuegos.length)} de ${filteredJuegos.length}`);
       
       setJuegos(paginatedJuegos);
+    } else {
+      setJuegos([]);
     }
-  }, [pagina, allJuegos]);
+  }, [pagina, filteredJuegos]);
 
   const loadJuegos = async () => {
     try {
@@ -91,7 +116,7 @@ const Juegos = () => {
   };
 
   const getVisiblePages = () => {
-    const totalPaginas = Math.ceil(total / JUEGOS_POR_PAGINA);
+    const totalPaginas = Math.ceil(filteredJuegos.length / JUEGOS_POR_PAGINA);
     const current = pagina;
     const pages = [];
     
@@ -274,6 +299,14 @@ const Juegos = () => {
         </Button>
       </div>
 
+      <SearchFilter
+        data={allJuegos}
+        onFilteredDataChange={setFilteredJuegos}
+        searchFields={['nombre', 'descripcion', 'categoria', 'materiales']}
+        placeholder="Buscar juegos por nombre, descripción, categoría o materiales..."
+        filterOptions={filterOptions}
+      />
+
       <Table
         data={juegos}
         columns={columns}
@@ -288,7 +321,7 @@ const Juegos = () => {
       {totalPaginas > 1 && (
         <div className="pagination-container">
           <div className="pagination-info">
-            Mostrando {((pagina - 1) * JUEGOS_POR_PAGINA) + 1} - {Math.min(pagina * JUEGOS_POR_PAGINA, total)} de {total} juegos
+            Mostrando {((pagina - 1) * JUEGOS_POR_PAGINA) + 1} - {Math.min(pagina * JUEGOS_POR_PAGINA, filteredJuegos.length)} de {filteredJuegos.length} juegos
           </div>
           <div className="pagination">
             <button

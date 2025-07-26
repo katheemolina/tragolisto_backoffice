@@ -4,6 +4,7 @@ import Table from '../../components/UI/Table';
 import Button, { PlusIcon } from '../../components/UI/Button';
 import Modal from '../../components/UI/Modal';
 import ConfirmDialog from '../../components/UI/ConfirmDialog';
+import SearchFilter from '../../components/UI/SearchFilter';
 import { ingredientesService } from '../../services/api';
 import { toast } from 'react-toastify';
 import './Ingredientes.css';
@@ -25,6 +26,7 @@ const Ingredientes = () => {
     es_alcohol: false,
     categoria: ''
   });
+  const [filteredIngredientes, setFilteredIngredientes] = useState([]);
 
   // Categorías predefinidas para el select
   const categorias = [
@@ -49,22 +51,45 @@ const Ingredientes = () => {
     'Bebida'
   ];
 
+  // Configuración de filtros para ingredientes
+  const filterOptions = {
+    es_alcohol: {
+      label: 'Tipo de ingrediente',
+      values: [
+        { value: true, label: 'Alcohólico' },
+        { value: false, label: 'Sin alcohol' }
+      ]
+    },
+    categoria: {
+      label: 'Categoría',
+      values: categorias.map(cat => ({ value: cat, label: cat }))
+    }
+  };
+
   useEffect(() => {
     loadIngredientes();
   }, []);
 
+  // Efecto para inicializar los datos filtrados cuando se cargan los datos
+  useEffect(() => {
+    setFilteredIngredientes(allIngredientes);
+    setPagina(1); // Resetear a la primera página cuando cambian los datos
+  }, [allIngredientes]);
+
   // Efecto separado para aplicar paginación cuando cambia la página
   useEffect(() => {
-    if (allIngredientes.length > 0) {
+    if (filteredIngredientes.length > 0) {
       const startIndex = (pagina - 1) * INGREDIENTES_POR_PAGINA;
       const endIndex = startIndex + INGREDIENTES_POR_PAGINA;
-      const paginatedIngredientes = allIngredientes.slice(startIndex, endIndex);
+      const paginatedIngredientes = filteredIngredientes.slice(startIndex, endIndex);
       
-      console.log(`Aplicando paginación: mostrando ingredientes ${startIndex + 1} a ${Math.min(endIndex, allIngredientes.length)} de ${allIngredientes.length}`);
+      console.log(`Aplicando paginación: mostrando ingredientes ${startIndex + 1} a ${Math.min(endIndex, filteredIngredientes.length)} de ${filteredIngredientes.length}`);
       
       setIngredientes(paginatedIngredientes);
+    } else {
+      setIngredientes([]);
     }
-  }, [pagina, allIngredientes]);
+  }, [pagina, filteredIngredientes]);
 
   const loadIngredientes = async () => {
     try {
@@ -93,7 +118,7 @@ const Ingredientes = () => {
   };
 
   const getVisiblePages = () => {
-    const totalPaginas = Math.ceil(total / INGREDIENTES_POR_PAGINA);
+    const totalPaginas = Math.ceil(filteredIngredientes.length / INGREDIENTES_POR_PAGINA);
     const current = pagina;
     const pages = [];
     
@@ -232,6 +257,14 @@ const Ingredientes = () => {
         </Button>
       </div>
 
+      <SearchFilter
+        data={allIngredientes}
+        onFilteredDataChange={setFilteredIngredientes}
+        searchFields={['nombre', 'categoria']}
+        placeholder="Buscar ingredientes por nombre o categoría..."
+        filterOptions={filterOptions}
+      />
+
       <Table
         data={ingredientes}
         columns={columns}
@@ -245,7 +278,7 @@ const Ingredientes = () => {
       {totalPaginas > 1 && (
         <div className="pagination-container">
           <div className="pagination-info">
-            Mostrando {((pagina - 1) * INGREDIENTES_POR_PAGINA) + 1} - {Math.min(pagina * INGREDIENTES_POR_PAGINA, total)} de {total} ingredientes
+            Mostrando {((pagina - 1) * INGREDIENTES_POR_PAGINA) + 1} - {Math.min(pagina * INGREDIENTES_POR_PAGINA, filteredIngredientes.length)} de {filteredIngredientes.length} ingredientes
           </div>
           <div className="pagination">
             <button

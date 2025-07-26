@@ -3,6 +3,7 @@ import Button, { PlusIcon } from '../../components/UI/Button';
 import Table from '../../components/UI/Table';
 import Modal from '../../components/UI/Modal';
 import ConfirmDialog from '../../components/UI/ConfirmDialog';
+import SearchFilter from '../../components/UI/SearchFilter';
 import { tragosService } from '../../services/api';
 import './Tragos.css';
 import { toast } from 'react-toastify';
@@ -33,6 +34,35 @@ const Tragos = () => {
     imagen_url: ''
   });
   const [pagina, setPagina] = useState(1);
+  const [filteredTragos, setFilteredTragos] = useState([]);
+
+  // Opciones de dificultad para el formulario
+  const dificultadOptions = [
+    { value: 'muy facil', label: 'Muy Fácil' },
+    { value: 'facil', label: 'Fácil' },
+    { value: 'media', label: 'Media' },
+    { value: 'dificil', label: 'Difícil' }
+  ];
+
+  // Configuración de filtros para tragos
+  const filterOptions = {
+    es_alcoholico: {
+      label: 'Tipo de bebida',
+      values: [
+        { value: 1, label: 'Alcohólico' },
+        { value: 0, label: 'Sin alcohol' }
+      ]
+    },
+    dificultad: {
+      label: 'Dificultad',
+      values: [
+        { value: 'muy facil', label: 'Muy Fácil' },
+        { value: 'facil', label: 'Fácil' },
+        { value: 'media', label: 'Media' },
+        { value: 'dificil', label: 'Difícil' }
+      ]
+    }
+  };
 
   const columns = [
     { key: 'nombre', header: 'Nombre' },
@@ -47,18 +77,26 @@ const Tragos = () => {
     // eslint-disable-next-line
   }, []);
 
+  // Efecto para inicializar los datos filtrados cuando se cargan los datos
+  useEffect(() => {
+    setFilteredTragos(allTragos);
+    setPagina(1); // Resetear a la primera página cuando cambian los datos
+  }, [allTragos]);
+
   // Efecto separado para aplicar paginación cuando cambia la página
   useEffect(() => {
-    if (allTragos.length > 0) {
+    if (filteredTragos.length > 0) {
       const startIndex = (pagina - 1) * TRAGOS_POR_PAGINA;
       const endIndex = startIndex + TRAGOS_POR_PAGINA;
-      const paginatedTragos = allTragos.slice(startIndex, endIndex);
+      const paginatedTragos = filteredTragos.slice(startIndex, endIndex);
       
-      console.log(`Aplicando paginación: mostrando tragos ${startIndex + 1} a ${Math.min(endIndex, allTragos.length)} de ${allTragos.length}`);
+      console.log(`Aplicando paginación: mostrando tragos ${startIndex + 1} a ${Math.min(endIndex, filteredTragos.length)} de ${filteredTragos.length}`);
       
       setTragos(paginatedTragos);
+    } else {
+      setTragos([]);
     }
-  }, [pagina, allTragos]);
+  }, [pagina, filteredTragos]);
 
   const loadTragos = async () => {
     try {
@@ -68,6 +106,8 @@ const Tragos = () => {
       const res = await tragosService.getAll();
       const data = res.data;
       console.log('Respuesta de la API:', data);
+      
+
       
       setAllTragos(data.tragos);
       setTotal(data.total);
@@ -160,7 +200,7 @@ const Tragos = () => {
   };
 
   // Paginación
-  const totalPaginas = Math.ceil(total / TRAGOS_POR_PAGINA);
+  const totalPaginas = Math.ceil(filteredTragos.length / TRAGOS_POR_PAGINA);
   const paginas = Array.from({ length: totalPaginas }, (_, i) => i + 1);
 
   const handlePageChange = (newPage) => {
@@ -212,7 +252,14 @@ const Tragos = () => {
            Nuevo Trago
         </Button>
       </div>
-  
+
+      <SearchFilter
+        data={allTragos}
+        onFilteredDataChange={setFilteredTragos}
+        searchFields={['nombre', 'descripcion', 'instrucciones']}
+        placeholder="Buscar tragos por nombre, descripción o instrucciones..."
+        filterOptions={filterOptions}
+      />
 
       <Table
         columns={columns}
@@ -225,7 +272,7 @@ const Tragos = () => {
       {totalPaginas > 1 && (
         <div className="pagination-container">
           <div className="pagination-info">
-            Mostrando {((pagina - 1) * TRAGOS_POR_PAGINA) + 1} - {Math.min(pagina * TRAGOS_POR_PAGINA, total)} de {total} tragos
+            Mostrando {((pagina - 1) * TRAGOS_POR_PAGINA) + 1} - {Math.min(pagina * TRAGOS_POR_PAGINA, filteredTragos.length)} de {filteredTragos.length} tragos
           </div>
           <div className="pagination">
           <button
@@ -309,13 +356,20 @@ const Tragos = () => {
             </div>
             <div className="form-group">
               <label className="form-label">Dificultad</label>
-              <input
-                type="text"
+              <select
                 name="dificultad"
                 value={formData.dificultad}
                 onChange={handleInputChange}
                 className="form-control"
-              />
+                required
+              >
+                <option value="">Selecciona la dificultad</option>
+                {dificultadOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
